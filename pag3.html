@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Análise de Desempenho por IA</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    select, button {
+      padding: 10px;
+      margin: 10px;
+      width: 300px;
+      font-size: 16px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 15px auto;
+      max-width: 400px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      background-color: #f9f9f9;
+    }
+    .card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+    }
+    .btn-voltar {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #ccc;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Análise de Desempenho por IA</h1>
+
+  <div>
+    <label for="clubeSelect">Selecione um clube:</label><br>
+    <select id="clubeSelect">
+      <option>Carregando clubes...</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="jogadorSelect">Selecione um jogador:</label><br>
+    <select id="jogadorSelect">
+      <option>Selecione um clube primeiro</option>
+    </select>
+  </div>
+
+  <button id="analisarBtn">Analisar Jogador</button>
+
+  <div id="resultado"></div>
+
+  <button class="btn-voltar" onclick="window.location.href='index.html'">Voltar à Página Inicial</button>
+
+  <script>
+    const API_URL = 'http://localhost:3001';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const clubeSelect = document.getElementById('clubeSelect');
+      const jogadorSelect = document.getElementById('jogadorSelect');
+      const resultadoDiv = document.getElementById('resultado');
+      const analisarBtn = document.getElementById('analisarBtn');
+
+      //  Carrega clubes
+      fetch(`${API_URL}/clubes`)
+        .then(res => res.json())
+        .then(clubes => {
+          clubeSelect.innerHTML = '<option value="">Selecione um clube</option>';
+          clubes.forEach(clube => {
+            const option = document.createElement('option');
+            option.value = clube.team.id;
+            option.textContent = clube.team.name;
+            clubeSelect.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Erro ao carregar clubes:', error);
+          clubeSelect.innerHTML = '<option>Erro ao carregar clubes</option>';
+        });
+
+      // Carrega jogadores ao selecionar clube
+      clubeSelect.addEventListener('change', () => {
+        const clubeId = clubeSelect.value;
+        jogadorSelect.innerHTML = '<option>Carregando jogadores...</option>';
+
+        fetch(`${API_URL}/jogadores?timeId=${clubeId}`)
+          .then(res => res.json())
+          .then(jogadores => {
+            jogadorSelect.innerHTML = '<option value="">Selecione um jogador</option>';
+            jogadores.forEach(item => {
+              const jogador = item.player;
+              const option = document.createElement('option');
+              option.value = JSON.stringify(item);
+              option.textContent = jogador.name;
+              jogadorSelect.appendChild(option);
+            });
+          })
+          .catch(error => {
+            console.error('Erro ao carregar jogadores:', error);
+            jogadorSelect.innerHTML = '<option>Erro ao carregar jogadores</option>';
+          });
+      });
+
+      // Analisar jogador
+      analisarBtn.addEventListener('click', () => {
+        const value = jogadorSelect.value;
+        if (!value) {
+          resultadoDiv.innerHTML = '<p>Selecione um jogador válido.</p>';
+          return;
+        }
+
+        const { player, statistics } = JSON.parse(value);
+        const stats = statistics[0];
+
+        const nome = player.name;
+        const idade = player.age || 'Não informado';
+        const posicao = player.position || 'Não informado';
+        const partidas = stats.games.appearences || 0;
+        const gols = stats.goals.total || 0;
+        const assistencias = stats.goals.assists || 0;
+        const foto = player.photo;
+
+        resultadoDiv.innerHTML = `
+          <div class="card">
+            <img src="${foto}" alt="Foto do jogador">
+            <h2>${nome}</h2>
+            <p><strong>Idade:</strong> ${idade}</p>
+            <p><strong>Posição:</strong> ${posicao}</p>
+            <p><strong>Partidas:</strong> ${partidas}</p>
+            <p><strong>Gols:</strong> ${gols}</p>
+            <p><strong>Assistências:</strong> ${assistencias}</p>
+          </div>
+
+          <div class="card">
+            <h3>Análise de Desempenho (IA)</h3>
+            <p>${gerarAnaliseIA(partidas, gols, assistencias)}</p>
+          </div>
+        `;
+      });
+
+      function gerarAnaliseIA(partidas, gols, assistencias) {
+        if (partidas === 0) return 'O jogador ainda não participou de partidas nesta temporada.';
+
+        const mediaGols = gols / partidas;
+        const mediaAssists = assistencias / partidas;
+
+        if (mediaGols >= 0.5) {
+          return 'Desempenho ofensivo excelente, com alta média de gols por partida.';
+        } else if (mediaGols >= 0.3) {
+          return 'Bom desempenho ofensivo, contribuindo regularmente com gols.';
+        } else if (mediaAssists >= 0.3) {
+          return 'Bom desempenho criativo, com foco em assistências.';
+        } else {
+          return 'Desempenho discreto. Pode melhorar em participações diretas em gols.';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
