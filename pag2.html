@@ -70,8 +70,10 @@
   <a class="botao-voltar" href="index.html">Voltar ao Início</a>
 
   <script>
+    const API_BASE_URL = 'https://appia-analise.onrender.com';
+
     async function carregarClubes() {
-      const resposta = await fetch('http://localhost:3001/clubes?liga=71&temporada=2023');
+      const resposta = await fetch(`${API_BASE_URL}/clubes`);
       const clubes = await resposta.json();
 
       const container = document.getElementById('clubes');
@@ -90,7 +92,7 @@
     }
 
     async function buscarJogadores(timeId) {
-      const resposta = await fetch(`http://localhost:3001/jogadores?timeId=${timeId}`);
+      const resposta = await fetch(`${API_BASE_URL}/jogadores?timeId=${timeId}`);
       const jogadores = await resposta.json();
 
       const container = document.getElementById('jogadores');
