@@ -66,7 +66,7 @@
   <button class="btn-voltar" onclick="window.location.href='index.html'">Voltar à Página Inicial</button>
 
   <script>
-    const API_URL = 'http://localhost:3001';
+    const API_URL = 'https://appia-analise.onrender.com';
 
     document.addEventListener('DOMContentLoaded', () => {
       const clubeSelect = document.getElementById('clubeSelect');
@@ -74,7 +74,7 @@
       const resultadoDiv = document.getElementById('resultado');
       const analisarBtn = document.getElementById('analisarBtn');
 
-      //  Carrega clubes
+      // Carrega clubes
       fetch(`${API_URL}/clubes`)
         .then(res => res.json())
         .then(clubes => {
