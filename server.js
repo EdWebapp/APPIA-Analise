@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { buscarJogadores, buscarClubes } = require('./services/footballAPI');
+const { buscarJogadores, buscarClubes } = require('./footballAPI');
 
 const app = express();
 const PORT = 3001;
